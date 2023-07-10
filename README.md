@@ -43,7 +43,7 @@ Here are all the available option for config:
 **1. Clone Repo**
 
 ```bash
-git clone https://github.com/crazydevlegend/chatbot-ui.git
+git clone https://github.com/crazydevlegend/bittensor-chatgpt.git
 ```
 
 **2. Install Dependencies**
