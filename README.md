@@ -76,14 +76,17 @@ You should be able to start chatting.
 
 When deploying the application, the following environment variables can be set:
 
-| Environment Variable | Default value          | Description                                              |
-| -------------------- | ---------------------- | -------------------------------------------------------- |
-| BITAPAI_API_KEY      |                        | The default API key used for authentication with BitAPAI |
-| BITAPAI_API_HOST     | https://api.bitapai.io | The default host to make request with BitAPAI            |
+| Environment Variable | Default value          | Description                                                         |
+| -------------------- | ---------------------- | ------------------------------------------------------------------- |
+| BITAPAI_API_KEY      |                        | The default API key used for authentication with BitAPAI            |
+| BITAPAI_API_HOST     | https://api.bitapai.io | The default host to make request with BitAPAI                       |
+| VE_API_KEY           |                        | The default API key used for authentication with Validator Endpoint |
+| VE_API_HOST          | https://api.bitapai.io | The default host to make request with Validator Endpoint            |
 
-If you do not provide an BitAPAI API key with `BITAPAI_API_KEY`, users will have to provide their own key.
+If you do not provide an BitAPAI API key with `BITAPAI_API_KEY` or `VE_API_KEY`, users will have to provide their own key.
 
-If you don't have an BitAPAI API key, you can get one [here](https://bitapai.io).
+- To claim your free Validator Endpoint key, [here](https://validator.fabhed.dev/).
+- To claim your free BitAPAI key, [here](https://bitapai.io).
 
 ## Contact
 
