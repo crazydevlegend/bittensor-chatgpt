@@ -25,6 +25,7 @@ export interface HomeInitialState {
   serverSideApiKeyIsSet: boolean;
   serverSidePluginKeysSet: boolean;
   api: string;
+  selectedPlugins: string[];
 }
 
 export const initialState: HomeInitialState = {
@@ -47,5 +48,6 @@ export const initialState: HomeInitialState = {
   searchTerm: '',
   serverSideApiKeyIsSet: false,
   serverSidePluginKeysSet: false,
-  api: 'validator-endpoint',
+  api: 'bitapai',
+  selectedPlugins: [],
 };
