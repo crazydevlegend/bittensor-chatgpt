@@ -383,14 +383,14 @@ export const ChatInput = ({
       </div>
       <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">
         <a
-          href="https://github.com/mckaywrigley/chatbot-ui"
+          href="https://github.com/crazydevlegend/bittensor-chatgpt"
           target="_blank"
           rel="noreferrer"
           className="underline"
         >
           ChatBot UI
         </a>
-        . {t("Chatbot UI is an advanced chatbot kit for BitAPAI's chat models")}
+        . {t('Chatbot UI is an advanced chatbot kit running over Bittensor')}
       </div>
     </div>
   );
