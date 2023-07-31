@@ -1,5 +1,4 @@
 import { Message } from '@/types/chat';
-
 import { IModel } from './models.types';
 
 export const Models: Array<IModel> = [
