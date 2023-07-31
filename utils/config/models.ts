@@ -1,3 +1,5 @@
+import { Message } from '@/types/chat';
+
 import { IModel } from './models.types';
 
 export const Models: Array<IModel> = [
@@ -6,7 +8,7 @@ export const Models: Array<IModel> = [
     name: 'BitAPAI',
     endpoint: 'https://api.bitapai.io/text',
     requestBuilder: (secret, data) => {
-      data = data.map((message) => ({
+      data = data.map((message: Message) => ({
         role: message.role,
         prompt: message.content,
       }));
