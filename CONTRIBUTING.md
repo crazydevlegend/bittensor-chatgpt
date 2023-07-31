@@ -31,15 +31,20 @@ git checkout -b your-branch-name
 
 Before submitting your pull request, please make sure your changes pass our automated tests and adhere to our code style guidelines.
 
+- Write detailed description about the plugin in [docs](.\docs) folder with appropriate name. (Example can be seen [Here](.\docs\open_weather.md))
+- Check all commit messages are in present tense and follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) guidelines.
+- Make sure the 3rd-API you are using on the plugin is available.
+
 ## Pull Request Process
 
 1. Fork the project on GitHub.
 2. Clone your forked repository locally on your machine.
-3. Create a new branch from the main branch.
+3. Create a new branch from the `master` branch.
 4. Make your changes on the new branch.
 5. Ensure that your changes adhere to our code style guidelines and pass our automated tests.
 6. Commit your changes and push them to your forked repository.
-7. Submit a pull request to the main branch of the main repository.
+7. Submit a pull request to the `master` branch of the main repository with a detailed description of your changes.
+8. Ask `@crazydevlegend` for review.
 
 ## Contact
 
