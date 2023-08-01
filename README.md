@@ -52,13 +52,9 @@ git clone https://github.com/crazydevlegend/bittensor-chatgpt.git
 npm i
 ```
 
-**3. Provide BitAPAI API Key**
+**3. Set Environment Variables**
 
-Create a .env.local file in the root of the repo with your BitAPAI API Key:
-
-```bash
-BITAPAI_API_KEY=YOUR_KEY
-```
+Create a .env.local file in the root of the repo:
 
 > You can set `BITAPAI_API_HOST` where access to the official BitAPAI host is restricted or unavailable, allowing users to configure an alternative host for their specific needs.
 
@@ -76,17 +72,27 @@ You should be able to start chatting.
 
 When deploying the application, the following environment variables can be set:
 
-| Environment Variable | Default value                    | Description                                                         |
-| -------------------- | -------------------------------- | ------------------------------------------------------------------- |
-| BITAPAI_API_KEY      |                                  | The default API key used for authentication with BitAPAI            |
-| BITAPAI_API_HOST     | https://api.bitapai.io           | The default host to make request with BitAPAI                       |
-| VE_API_KEY           |                                  | The default API key used for authentication with Validator Endpoint |
-| VE_API_HOST          | https://validator-api.fabhed.dev | The default host to make request with Validator Endpoint            |
+| Environment Variable | Default value                    | Description                                                                    |
+| -------------------- | -------------------------------- | ------------------------------------------------------------------------------ |
+| BITAPAI_API_KEY      |                                  | The default API key used for authentication with BitAPAI (Optional)            |
+| BITAPAI_API_HOST     | https://api.bitapai.io           | The default host to make request with BitAPAI (Optional)                       |
+| VE_API_KEY           |                                  | The default API key used for authentication with Validator Endpoint (Optional) |
+| VE_API_HOST          | https://validator-api.fabhed.dev | The default host to make request with Validator Endpoint (Optional)            |
 
 If you do not provide an BitAPAI API key with `BITAPAI_API_KEY` or `VE_API_KEY`, users will have to provide their own key.
 
 - To claim your free Validator Endpoint key, [here](https://validator.fabhed.dev/).
-- To claim your free BitAPAI key, [here](https://bitapai.io).
+- To claim your free BitAPAI key, [here](https://app.bitapai.io).
+
+(
+Note: For every plugin, it may require certain API keys for 3rd-party API integration. Please refer to the plugin's documentation or appropriate PR for more information.
+For example: The `OpenWeather` plugin requires `OpenWeatherAPI` API key.
+)
+
+## Plugins
+
+Don't forget to add API keys required for plugins in the `.env.local` file.
+To add new plugins, kindly check the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 
 ## Contact
 
