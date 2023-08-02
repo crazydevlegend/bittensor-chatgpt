@@ -5,7 +5,7 @@ export const runPlugin = async () => {
 export default {
   id: 'world-news',
   name: 'World News',
-  description: 'Provides news based on location.',
+  description: 'Provides world news from various sources.',
   parameters: {},
   run: runPlugin,
 };
