@@ -1,13 +1,11 @@
-
 export const runPlugin = async () => {
-  return "Hello World!";
-}
+  return 'Need to integrate WorldNews API - coming soon...';
+};
 
 export default {
-  id: 'news',
-  name: 'News',
+  id: 'world-news',
+  name: 'World News',
   description: 'Provides news based on location.',
-  parameters: {
-  },
-  run: runPlugin
+  parameters: {},
+  run: runPlugin,
 };
