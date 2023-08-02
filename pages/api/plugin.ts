@@ -1,3 +1,5 @@
+import { BITAPAI_API_HOST } from '@/utils/app/const';
+
 import { plugins as allPlugins } from './plugins';
 
 export async function choose_plugin(
@@ -40,7 +42,7 @@ You must respond only with json format with type of followings
     return_all: true,
   };
   console.log('data', data);
-  const response = await fetch(`https://api.bitapai.io/text`, {
+  const response = await fetch(`${BITAPAI_API_HOST}/text`, {
     headers: {
       'Content-Type': 'application/json',
       'X-API-KEY': api,
