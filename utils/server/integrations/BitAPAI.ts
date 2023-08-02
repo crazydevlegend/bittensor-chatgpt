@@ -14,7 +14,7 @@ export const BitAPAIConversation = async (
   messages: Message[],
   systemPrompt: string,
 ) => {
-  const url = `${BITAPAI_API_HOST}/v1/conversation`;
+  const url = `${BITAPAI_API_HOST}/text`;
 
   const res = await fetch(url, {
     headers: {
@@ -25,9 +25,12 @@ export const BitAPAIConversation = async (
     body: JSON.stringify([
       {
         role: 'system',
-        content: systemPrompt,
+        prompt: systemPrompt,
       },
-      ...messages,
+      ...messages.map((message) => ({
+        role: message.role,
+        prompt: message.content,
+      })),
     ]),
   });
 
@@ -37,5 +40,5 @@ export const BitAPAIConversation = async (
     throw new BitAPAIError(`BitAPAI: ${json}`);
   }
 
-  return json?.['assistant'] || '';
+  return json?.['response_data'][0]?.response || '';
 };
