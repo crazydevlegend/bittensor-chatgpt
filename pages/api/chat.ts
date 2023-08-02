@@ -57,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
       systemPrompt: prompt,
       apiId: api,
     });
-
+    
     // let response;
 
     // switch (api) {

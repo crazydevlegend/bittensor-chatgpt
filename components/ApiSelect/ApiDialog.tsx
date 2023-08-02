@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useRef } from 'react';
+import { FC, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -20,7 +20,15 @@ export const ModelDialog: FC<Props> = ({ open, onClose }) => {
     dispatch: homeDispatch,
     state: { api },
   } = useContext(HomeContext);
-
+  const [visibleKey, setVisibleKey] = useState(false)
+  const onChangeOption = (api_id:any) => {
+    
+    if(api_id == "bitapai" || api_id == "validator-endpoint"){
+      setVisibleKey(true)
+    } else {
+      setVisibleKey(false)
+    }
+  }
   return (
     <Dialog onClose={onClose} open={open}>
       <div className="text-lg pb-4 font-bold text-black dark:text-neutral-200">
@@ -34,13 +42,15 @@ export const ModelDialog: FC<Props> = ({ open, onClose }) => {
           <select
             className="w-full cursor-pointer bg-transparent p-2 dark:text-neutral-200 text-black"
             value={api}
-            onChange={(event) =>
+            onChange={(event) =>{
+              onChangeOption(event.target.value)
               homeDispatch({ field: 'api', value: event.target.value })
+              }
             }
           >
             {Models ? (
               Models?.map((api) => (
-                <option key={api.id} value={api.id} className="text-black">
+                <option key={api.id} value={api.id} className="text-black" >
                   {t(api.name)}
                 </option>
               ))
@@ -49,12 +59,13 @@ export const ModelDialog: FC<Props> = ({ open, onClose }) => {
             )}
           </select>
         </div>
-        <div>
+        {visibleKey?(<div>
           <div className="text-sm font-bold mb-2 text-black dark:text-neutral-200">
-            {t('Key')}
-          </div>
-          <Key />
-        </div>
+              {t('Key')}
+            </div>
+            <Key />
+          </div>):<></>
+        }
       </div>
       <button
         type="button"

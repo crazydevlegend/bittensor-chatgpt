@@ -29,7 +29,7 @@ export interface HomeInitialState {
 }
 
 export const initialState: HomeInitialState = {
-  apiKey: '',
+  apiKey: 'Bittensor-endpoint',
   loading: false,
   pluginKeys: [],
   lightMode: 'dark',
@@ -48,6 +48,6 @@ export const initialState: HomeInitialState = {
   searchTerm: '',
   serverSideApiKeyIsSet: false,
   serverSidePluginKeysSet: false,
-  api: 'bitapai',
+  api: 'Bittensor-endpoint',
   selectedPlugins: [],
 };
