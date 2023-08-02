@@ -1,4 +1,5 @@
 import { Message } from '@/types/chat';
+
 import { IModel } from './models.types';
 
 export const Models: Array<IModel> = [
@@ -31,7 +32,7 @@ export const Models: Array<IModel> = [
       return json?.['response_data'][0]['response'] || '';
     },
     errorExtractor: (json: any) => {
-      return `BitAPAI Error: ${json || 'Unknown error'}`;
+      return `BitAPAI Error: ${json?.error || 'Unknown error'}`;
     },
     defaultPrompt:
       "**Start new session** You are an AI assistant. Follow the user's instructions carefully. Respond using markdown.",
