@@ -1,12 +1,13 @@
 import { Message } from '@/types/chat';
 
+import { BITAPAI_API_HOST } from '../app/const';
 import { IModel } from './models.types';
 
 export const Models: Array<IModel> = [
   {
     id: 'bitapai',
     name: 'BitAPAI',
-    endpoint: 'https://api.bitapai.io/text',
+    endpoint: `${BITAPAI_API_HOST}/text`,
     requestBuilder: (secret, data) => {
       data = data.map((message: Message) => ({
         role: message.role,
@@ -40,7 +41,7 @@ export const Models: Array<IModel> = [
   {
     id: 'validator-endpoint',
     name: 'Validator Endpoint',
-    endpoint: 'https://validator-api.fabhed.dev/chat',
+    endpoint: `${VALIDATOR_ENDPOINT_API_HOST}/chat`,
     requestBuilder: (secret, data) => {
       return {
         headers: {
