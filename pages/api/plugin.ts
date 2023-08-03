@@ -41,7 +41,6 @@ You must respond only with json format with type of followings
     count: 8,
     return_all: true,
   };
-  console.log('data', data);
   const response = await fetch(`${BITAPAI_API_HOST}/text`, {
     headers: {
       'Content-Type': 'application/json',
@@ -67,7 +66,6 @@ You must respond only with json format with type of followings
 
     if (plugin) {
       const plugin_response = await plugin.run(valid_response.parameters);
-      console.log('plugin response', plugin_response);
       return `This is response of ${
         plugin.id
       } plugin for "${message}" ${JSON.stringify(plugin_response)}
@@ -80,10 +78,12 @@ You must respond only with json format with type of followings
 function validate_response(resp_text: string) {
   try {
     const resp_json = JSON.parse(resp_text);
+
     if (resp_json.plugin && resp_json.parameters) {
       const plugin = allPlugins.find(
         (plugin) => plugin.id === resp_json.plugin,
       );
+
       if (!plugin) return false;
       if (
         Object.keys(plugin.parameters).some((key) => !resp_json.parameters[key])

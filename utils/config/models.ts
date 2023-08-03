@@ -1,6 +1,6 @@
 import { Message } from '@/types/chat';
 
-import { BITAPAI_API_HOST } from '../app/const';
+import { BITAPAI_API_HOST, VALIDATOR_ENDPOINT_API_HOST } from '../app/const';
 import { IModel } from './models.types';
 
 export const Models: Array<IModel> = [
@@ -13,7 +13,6 @@ export const Models: Array<IModel> = [
         role: message.role,
         prompt: message.content,
       }));
-      console.log(data);
 
       return {
         headers: {
