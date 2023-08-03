@@ -1,12 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
-import {
-  BitAPAIConversation,
-  BitAPAIError,
-  ValidatorEndpointConversation,
-  ValidatorEndpointError,
-} from '@/utils/server';
 import {
   APIError,
   ConversationApi,
@@ -35,6 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
       plugins,
       key,
     );
+
     if (plugin_assistant) {
       const lastMessage = messages.pop();
       messages.push({
@@ -58,36 +52,10 @@ const handler = async (req: Request): Promise<Response> => {
       apiId: api,
     });
 
-    // let response;
-
-    // switch (api) {
-    //   case 'BITAPAI':
-    //     // add Respond using markdown to BitAPAI cause it supports markdown response
-    //     response = await BitAPAIConversation(
-    //       key,
-    //       messagesToSend,
-    //       `${promptToSend} Respond using markdown.`,
-    //     );
-    //     break;
-    //   case 'Validator Endpoint':
-    //     response = await ValidatorEndpointConversation(
-    //       key,
-    //       messagesToSend,
-    //       promptToSend,
-    //     );
-    //     break;
-    //   default:
-    //     throw new Error(`${api} not implemented`);
-    // }
-
     return new Response(response);
   } catch (error) {
     console.error(error);
-    if (
-      error instanceof APIError
-      // error instanceof BitAPAIError ||
-      // error instanceof ValidatorEndpointError
-    ) {
+    if (error instanceof APIError) {
       return NextResponse.json(
         { type: 'Error', error: error.message },
         {
