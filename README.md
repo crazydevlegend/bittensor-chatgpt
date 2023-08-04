@@ -10,10 +10,6 @@ Chatbot UI will be updated over time.
 
 Expect frequent improvements.
 
-**Next up:**
-
-- [ ] Langchain Wrapper
-
 ## Deploy
 
 **Vercel**
@@ -93,6 +89,46 @@ For example: The `OpenWeather` plugin requires `OpenWeatherAPI` API key.
 
 Don't forget to add API keys required for plugins in the `.env.local` file.
 To add new plugins, kindly check the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
+
+**Plugins being developed:**
+
+- [*] World Weather
+- [*] World News
+- [ ] WolframAlpha
+- [ ] ChatWithPDF
+- [ ] Link Reader
+- [ ] Instacart
+- [ ] WebDev
+- [ ] Mixerbox Translate
+- [ ] Scholar AI
+- [ ] Zapier
+- [ ] Expedia and Kayak
+- [ ] OpenTable
+- [ ] VoxScript
+- [ ] What to Watch
+- [ ] Argil AI
+- [ ] Stories
+- [ ] Speak
+- [ ] MixerBox OnePlayer
+- [ ] Show Me
+- [ ] Meme Generator
+- [ ] Questmate Forms
+- [ ] Image Editor
+- [ ] LikeWise
+- [ ] GameSight
+- [ ] Change
+- [ ] Search Engines
+  - [ ] Google
+  - [ ] Bing
+  - [ ] DuckDuckGo
+  - [ ] Brave
+- [ ] Crypto ERC20 Scout
+- [ ] Job search by Indeed
+- [ ] Public
+- [ ] Social Search
+- [ ] Turo
+- [ ] Zillow
+- [ ] GitHub [UNOFFICIAL] Plugin
 
 ## Contact
 
