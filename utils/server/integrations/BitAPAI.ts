@@ -22,16 +22,24 @@ export const BitAPAIConversation = async (
       'X-API-KEY': `${key ? key : process.env.BITAPAI_API_KEY}`,
     },
     method: 'POST',
-    body: JSON.stringify([
+    body: JSON.stringify(
+      // [
+      //   {
+      //     role: 'system',
+      //     content: systemPrompt,
+      //   },
+      //   ...messages,
+      // ],
       {
-        role: 'system',
-        prompt: systemPrompt,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          ...messages,
+        ],
       },
-      ...messages.map((message) => ({
-        role: message.role,
-        prompt: message.content,
-      })),
-    ]),
+    ),
   });
 
   const json = await res.json();
@@ -40,5 +48,5 @@ export const BitAPAIConversation = async (
     throw new BitAPAIError(`BitAPAI: ${json}`);
   }
 
-  return json?.['response_data'][0]?.response || '';
+  return json?.['choices'][0]?.message.content || '';
 };
