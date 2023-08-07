@@ -7,6 +7,9 @@ export async function choose_plugin(
   plugins: string[],
   api: string,
 ) {
+  if (!plugins || plugins.length == 0) {
+    return '';
+  }
   const plugins_with_description = allPlugins.filter((plugin) =>
     plugins.includes(plugin.id),
   );
@@ -27,20 +30,21 @@ Parameters: ${JSON.stringify(plugin.parameters)}\n`;
 You must respond only with json format with type of followings
 {"plugin":PLUGIN_NAME, "parameters":{PARAM1:PARAM1_VALUE,PARAM2:PARAM2_VALUE,...}}`;
   const data = {
-    conversation: [
+    messages: [
       {
         role: 'system',
-        prompt: systemPrompt,
+        content: systemPrompt,
       },
       {
         role: 'user',
-        prompt: message,
+        content: message,
       },
     ],
     // uids: (new Array(16)).fill(22),
-    count: 8,
+    // count: 8,
     return_all: true,
   };
+
   const response = await fetch(`${BITAPAI_API_HOST}/text`, {
     headers: {
       'Content-Type': 'application/json',
@@ -50,8 +54,8 @@ You must respond only with json format with type of followings
     body: JSON.stringify(data),
   }).then((res) => res.json());
 
-  const response_texts = response.response_data.map(
-    (each: any) => each.response,
+  const response_texts = response.choices.map(
+    (each: any) => each.message.content,
   );
 
   const valid_responses = response_texts.filter((each: string) =>

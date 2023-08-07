@@ -48,7 +48,6 @@ export const ConversationApi = async ({
   );
 
   const json = await res.json();
-  console.log(json);
 
   if (res.status !== 200) {
     const extractedErrorMEssage = errorExtractor(json);

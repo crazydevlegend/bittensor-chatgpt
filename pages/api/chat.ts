@@ -32,8 +32,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (plugin_assistant) {
       const lastMessage = messages.pop();
       messages.push({
-        content: plugin_assistant,
         role: 'assistant',
+        content: plugin_assistant,
       });
       if (lastMessage) messages.push(lastMessage);
     }
