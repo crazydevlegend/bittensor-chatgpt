@@ -9,11 +9,6 @@ export const Models: Array<IModel> = [
     name: 'BitAPAI',
     endpoint: `${BITAPAI_API_HOST}/text`,
     requestBuilder: (secret, data) => {
-      data = data.map((message: Message) => ({
-        role: message.role,
-        prompt: message.content,
-      }));
-
       return {
         headers: {
           'Content-Type': 'application/json',
@@ -21,15 +16,14 @@ export const Models: Array<IModel> = [
         },
         method: 'POST',
         body: JSON.stringify({
-          conversation: data,
-          count: 1,
-          // uids: [387, 158, 40, 410, 187, 500, 846],
+          messages: data,
+          // count: 1,
           // return_all: true,
         }),
       };
     },
     responseExtractor: (json: any) => {
-      return json?.['response_data'][0]['response'] || '';
+      return json?.['choices'][0]['message'].content || '';
     },
     errorExtractor: (json: any) => {
       return `BitAPAI Error: ${json?.error || 'Unknown error'}`;
