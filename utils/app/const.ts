@@ -3,7 +3,7 @@ export const DEFAULT_SYSTEM_PROMPT =
   "You are an AI assistant. Follow the user's instructions carefully.";
 
 export const BITAPAI_API_HOST =
-  process.env.BITAPAI_API_HOST || 'https://staging-api.bitapai.io';
+  process.env.BITAPAI_API_HOST || 'https://api.bitapai.io';
 
 export const MESSAGE_MAX_LENGTH = 1000;
 

@@ -54,10 +54,6 @@ You must respond only with json format with type of followings
     body: JSON.stringify(data),
   }).then((res) => res.json());
 
-  console.log('*******************');
-  console.log(response);
-  console.log('*******************');
-
   const response_texts = response.choices.map(
     (each: any) => each.message.content,
   );
@@ -65,7 +61,6 @@ You must respond only with json format with type of followings
   const valid_responses = response_texts.filter((each: string) =>
     validate_response(each),
   );
-  console.log(valid_responses);
 
   if (valid_responses.length > 0) {
     const valid_response = JSON.parse(valid_responses[0]);

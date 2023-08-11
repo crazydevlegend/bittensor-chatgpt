@@ -3,10 +3,6 @@ export const runPlugin = async ({ q }: { q: string }) => {
     `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_SEARCH_API_KEY}&cx=${process.env.GOOGLE_SEARCH_ENGINE_ID}&q=${q}`,
   ).then((res) => res.json());
 
-  console.log('=======================');
-  console.log(resp);
-  console.log('=======================');
-
   // extract 'htmlTitle', 'link', 'displayLink', 'htmlSnippet','htmlFormattedUrl', 'pagemap' from resp.items
   const items = resp.items.map((item: any) => {
     return {
@@ -21,7 +17,7 @@ export const runPlugin = async ({ q }: { q: string }) => {
   return (
     "Here's the google search result for the user query:\n" +
     items.join('\n') +
-    'Please show this to the user in bullets or any other format.'
+    'Please analyze the search results from the Google Search Engine API and generate concise and human-readable responses based on the information you find. Your goal is to provide accurate and valuable insights to users based on the search results.'
   );
 };
 
