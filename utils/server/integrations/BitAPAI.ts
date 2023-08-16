@@ -23,13 +23,6 @@ export const BitAPAIConversation = async (
     },
     method: 'POST',
     body: JSON.stringify(
-      // [
-      //   {
-      //     role: 'system',
-      //     content: systemPrompt,
-      //   },
-      //   ...messages,
-      // ],
       {
         messages: [
           {

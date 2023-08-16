@@ -41,7 +41,7 @@ You must respond only with json format with type of followings
       },
     ],
     // uids: (new Array(16)).fill(22),
-    // count: 20,
+    count: 20,
     return_all: true,
   };
 
@@ -57,10 +57,12 @@ You must respond only with json format with type of followings
   const response_texts = response.choices.map(
     (each: any) => each.message.content,
   );
+  console.log(response_texts);
 
   const valid_responses = response_texts.filter((each: string) =>
     validate_response(each),
   );
+  console.log(valid_responses);
 
   if (valid_responses.length > 0) {
     const valid_response = JSON.parse(valid_responses[0]);
@@ -69,6 +71,8 @@ You must respond only with json format with type of followings
     );
 
     if (plugin) {
+      console.log('running plugin');
+
       const plugin_response = await plugin.run(valid_response.parameters);
       return `This is response of ${
         plugin.id

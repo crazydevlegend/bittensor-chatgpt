@@ -6,10 +6,13 @@ export const runPlugin = async ({ q }: { q: string }) => {
   // extract 'htmlTitle', 'link', 'displayLink', 'htmlSnippet','htmlFormattedUrl', 'pagemap' from resp.items
   const items = resp.items.map((item: any) => {
     return {
+      title: item.title,
       htmlTitle: item.htmlTitle,
       link: item.link,
       displayLink: item.displayLink,
+      snippet: item.snippet,
       htmlSnippet: item.htmlSnippet,
+      formattedUrl: item.formattedUrl,
       htmlFormattedUrl: item.htmlFormattedUrl,
     };
   });
@@ -17,7 +20,12 @@ export const runPlugin = async ({ q }: { q: string }) => {
   return (
     "Here's the google search result for the user query:\n" +
     items.join('\n') +
-    'Please analyze the search results from the Google Search Engine API and generate concise and human-readable responses based on the information you find. Your goal is to provide accurate and valuable insights to users based on the search results.'
+    "\n\nNow, I need you to analyze these search results and provide a detailed summary. Here's what you should focus on:\n" +
+    "- The main idea or theme of each search result\n" +
+    "- Any common patterns or themes across the search results\n" +
+    "- Noteworthy or surprising details from the search results\n" +
+    "- Any other insights or conclusions you can draw from the search results\n\n" +
+    "Remember, your goal is to provide the search result in bullets as well as a comprehensive and understandable summary of these search results below."
   );
 };
 
