@@ -31,7 +31,7 @@ git checkout -b your-branch-name
 
 Before submitting your pull request, please make sure your changes pass our automated tests and adhere to our code style guidelines.
 
-- Write detailed description about the plugin in [docs](.\docs) folder with appropriate name. (Example can be seen [Here](.\docs\open_weather.md))
+- Write detailed description about the plugin in [docs](.\docs) folder with appropriate name. (Example can be seen [Here](.\docs\open-weather.md))
 - Check all commit messages are in present tense and follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) guidelines.
 - Make sure the 3rd-API you are using on the plugin is available.
 
