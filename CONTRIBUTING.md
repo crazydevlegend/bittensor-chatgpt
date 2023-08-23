@@ -44,6 +44,7 @@ Before submitting your pull request, please make sure your changes pass our auto
    - Create new file for your plugin [here](\pages\api\plugins) which will be used for 3rd-party API integration
    - Add the entry to your plugin here [here](\pages\api\plugins\index.ts#L5C6-L5C6)
    - Add environment variables required to run the plugin (i.e. API-keys, Config variables, etc.) to [here](.env.local.example)
+   - Tick the plugin you completed in [README](README.md).
 5. Ensure that your changes adhere to our code style guidelines and pass our automated tests.
 6. Commit your changes and push them to your forked repository.
 7. Submit a pull request to the `master` branch of the main repository with a detailed description of your changes.

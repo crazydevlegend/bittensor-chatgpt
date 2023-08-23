@@ -118,7 +118,7 @@ To add new plugins, kindly check the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 - [ ] GameSight
 - [ ] Change
 - [ ] Search Engines
-  - [ ] Google
+  - [*] Google
   - [ ] Bing
   - [ ] DuckDuckGo
   - [ ] Brave
