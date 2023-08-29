@@ -15,8 +15,8 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   try {
-    const { messages, key, prompt, api, plugins } =
-      (await req.json()) as ChatBody;
+    const { messages, key, prompt, api, plugins, others } =
+      (await req.json());
 
     // let promptToSend = prompt;
     // if (!promptToSend) {
@@ -27,8 +27,8 @@ const handler = async (req: Request): Promise<Response> => {
       messages[messages.length - 1].content,
       plugins,
       key,
+      others,
     );
-
     if (plugin_assistant) {
       const lastMessage = messages.pop();
       messages.push({

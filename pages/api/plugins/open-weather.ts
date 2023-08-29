@@ -2,8 +2,8 @@ export const runPlugin = async ({
   latitude,
   longitude,
 }: {
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
 }) => {
   const resp: any = await fetch(
     `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&appid=${process.env.WEATHER_API_KEY}&units=metric`,

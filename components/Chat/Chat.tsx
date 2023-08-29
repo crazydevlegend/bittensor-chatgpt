@@ -51,6 +51,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       prompts,
       api,
       selectedPlugins,
+      publicPDFLink
     },
     handleUpdateConversation,
     dispatch: homeDispatch,
@@ -99,9 +100,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           api,
         };
         const endpoint = getEndpoint(plugin);
+        console.log("----------plugin----------", selectedPlugins, selectedPlugins.includes("chatpdf"));
         let body;
         if (!plugin) {
-          body = JSON.stringify(chatBody);
+          if (selectedPlugins.includes("chatpdf")) {
+            body = JSON.stringify({
+              ...chatBody,
+              others: {
+                publicPDFLink
+              }
+            });
+          }
+          else body = JSON.stringify(chatBody);
         } else {
           body = JSON.stringify({
             ...chatBody,

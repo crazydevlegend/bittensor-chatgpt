@@ -1,4 +1,4 @@
-export const runPlugin = async ({ q }: { q: string }) => {
+export const runPlugin = async ({ q }: { q?: string }) => {
   const resp: any = await fetch(
     `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_SEARCH_API_KEY}&cx=${process.env.GOOGLE_SEARCH_ENGINE_ID}&q=${q}`,
   ).then((res) => res.json());
