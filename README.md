@@ -94,7 +94,7 @@ To add new plugins, kindly check the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 
 - [*] World Weather
 - [*] World News
-- [ ] WolframAlpha
+- [*] WolframAlpha
 - [ ] ChatWithPDF
 - [ ] Link Reader
 - [ ] Instacart
