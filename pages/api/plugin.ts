@@ -89,6 +89,14 @@ You must respond only with json format with type of followings{"plugin":PLUGIN_N
   return '';
 }
 
+const isWebDevPluginWithMatcParam = (plugin: any, resp_json: any) => {
+  const isWebDevPlugin = plugin.id === 'web-dev';
+  const hasMatchingParameters = Object.keys(resp_json.parameters).every(
+    (key) => plugin.parameters[key],
+  );
+  return isWebDevPlugin && hasMatchingParameters;
+};
+
 function validate_response(resp_text: string) {
   try {
     const resp_json = JSON.parse(resp_text);
@@ -102,6 +110,7 @@ function validate_response(resp_text: string) {
       console.log(resp_json.parameters);
       console.log("****************");
       if (!plugin) return false;
+      if (isWebDevPluginWithMatcParam(plugin, resp_json)) return true;
       if (Object.keys(plugin.parameters).some((key) => !resp_json.parameters[key]))
         return false;
       return true;
