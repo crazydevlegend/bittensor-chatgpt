@@ -3,14 +3,15 @@ export interface Message {
   content: string;
 }
 
-export type Role = 'system' | 'assistant' | 'user';
+export type Role = 'assistant' | 'user';
 
 export interface ChatBody {
   messages: Message[];
   key: string;
   prompt: string;
-  plugins: string[];
+  uid: number | undefined;
   api: string;
+  plugins: string[];
 }
 
 export interface Conversation {
@@ -18,6 +19,5 @@ export interface Conversation {
   name: string;
   messages: Message[];
   prompt: string;
-  temperature: number;
   folderId: string | null;
 }

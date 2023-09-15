@@ -1,4 +1,4 @@
-import { IconClearAll } from '@tabler/icons-react';
+import { useAuth0 } from '@auth0/auth0-react';
 import {
   MutableRefObject,
   memo,
@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { getEndpoint } from '@/utils/app/api';
+import { title } from '@/utils/app/const';
 import {
   saveConversation,
   saveConversations,
@@ -25,17 +26,16 @@ import { Plugin } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import LoginButton from '../LoginButton';
+import LogoutButton from '../LogoutButton';
+import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
-import { ErrorMessageDiv } from './ErrorMessageDiv';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
-import { SystemPrompt } from './SystemPrompt';
 
-interface Props {
-  stopConversationRef: MutableRefObject<boolean>;
-}
-
-export const Chat = memo(({ stopConversationRef }: Props) => {
+export const Chat = memo(() => {
+  const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
+    useAuth0();
   const { t } = useTranslation('chat');
 
   const {
@@ -58,7 +58,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
-  const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
 
@@ -66,8 +65,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleStopConversation = () => {
+    abortControllerRef.current?.abort();
+  };
+
   const handleSend = useCallback(
-    async (message: Message, deleteCount = 0, plugin: Plugin | null = null) => {
+    async (
+      message: Message,
+      deleteCount = 0,
+      plugin: Plugin | null = null,
+      uid?: undefined | number,
+    ) => {
       if (selectedConversation) {
         let updatedConversation: Conversation;
         if (deleteCount) {
@@ -91,13 +101,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         });
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
+        const { access_token } = await getAccessTokenSilently({
+          detailedResponse: true,
+        });
         const chatBody: ChatBody = {
           messages: updatedConversation.messages,
-          key: apiKey,
+          key: access_token,
           prompt: updatedConversation.prompt,
+          uid,
           plugins: selectedPlugins,
           api,
         };
+        console.log('Messages in request', chatBody.messages);
+
         const endpoint = getEndpoint(plugin);
         let body;
         if (!plugin) {
@@ -113,28 +129,33 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               ?.requiredKeys.find((key) => key.key === 'GOOGLE_CSE_ID')?.value,
           });
         }
+
         const controller = new AbortController();
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          signal: controller.signal,
-          body,
-        });
-        if (!response.ok) {
+        abortControllerRef.current = controller;
+
+        try {
+          const response = await fetch('api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            signal: controller.signal,
+
+            body,
+          });
+
+          if (!response.ok) {
+            try {
+              toast.error((await response.json())?.error);
+            } catch (err) {
+              toast.error('Unexpected error');
+            }
+            return;
+          }
+          // Response OK!
+          const json = await response.json();
+          console.log('Response', json);
           homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          toast.error((await response.json()).error);
-          return;
-        }
-        const data = response.body;
-        if (!data) {
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          return;
-        }
-        if (!plugin) {
           if (updatedConversation.messages.length === 1) {
             const { content } = message;
             const customName =
@@ -144,86 +165,27 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               name: customName,
             };
           }
-          homeDispatch({ field: 'loading', value: false });
-          const reader = data.getReader();
-          const decoder = new TextDecoder();
-          let done = false;
-          let isFirst = true;
-          let text = '';
-          while (!done) {
-            if (stopConversationRef.current === true) {
-              controller.abort();
-              done = true;
-              break;
-            }
-            const { value, done: doneReading } = await reader.read();
-            done = doneReading;
-            const chunkValue = decoder.decode(value);
-            text += chunkValue;
-            if (isFirst) {
-              isFirst = false;
-              const updatedMessages: Message[] = [
-                ...updatedConversation.messages,
-                { role: 'assistant', content: chunkValue },
-              ];
-              updatedConversation = {
-                ...updatedConversation,
-                messages: updatedMessages,
-              };
-              homeDispatch({
-                field: 'selectedConversation',
-                value: updatedConversation,
-              });
-            } else {
-              const updatedMessages: Message[] =
-                updatedConversation.messages.map((message, index) => {
-                  if (index === updatedConversation.messages.length - 1) {
-                    return {
-                      ...message,
-                      content: text,
-                    };
-                  }
-                  return message;
-                });
-              updatedConversation = {
-                ...updatedConversation,
-                messages: updatedMessages,
-              };
-              homeDispatch({
-                field: 'selectedConversation',
-                value: updatedConversation,
-              });
-            }
-          }
-          saveConversation(updatedConversation);
-          const updatedConversations: Conversation[] = conversations.map(
-            (conversation) => {
-              if (conversation.id === selectedConversation.id) {
-                return updatedConversation;
-              }
-              return conversation;
-            },
-          );
-          if (updatedConversations.length === 0) {
-            updatedConversations.push(updatedConversation);
-          }
-          homeDispatch({ field: 'conversations', value: updatedConversations });
-          saveConversations(updatedConversations);
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-        } else {
-          const { answer } = await response.json();
           const updatedMessages: Message[] = [
             ...updatedConversation.messages,
-            { role: 'assistant', content: answer },
+            json.choices[0].message,
           ];
           updatedConversation = {
             ...updatedConversation,
             messages: updatedMessages,
           };
+        } catch (err) {
+          if (err instanceof DOMException && err.name === 'AbortError') {
+            console.log('Aborted');
+          } else {
+            console.error('Unexpected error', err);
+          }
+        } finally {
           homeDispatch({
             field: 'selectedConversation',
-            value: updateConversation,
+            value: updatedConversation,
           });
+          homeDispatch({ field: 'loading', value: false });
+          homeDispatch({ field: 'messageIsStreaming', value: false });
           saveConversation(updatedConversation);
           const updatedConversations: Conversation[] = conversations.map(
             (conversation) => {
@@ -238,8 +200,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           }
           homeDispatch({ field: 'conversations', value: updatedConversations });
           saveConversations(updatedConversations);
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
         }
       }
     },
@@ -248,7 +208,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       conversations,
       pluginKeys,
       selectedConversation,
-      stopConversationRef,
       api,
       selectedPlugins,
     ],
@@ -282,10 +241,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       top: chatContainerRef.current.scrollHeight,
       behavior: 'smooth',
     });
-  };
-
-  const handleSettings = () => {
-    setShowSettings(!showSettings);
   };
 
   const onClearAll = () => {
@@ -349,126 +304,88 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
-      {!(apiKey || serverSideApiKeyIsSet) ? (
-        <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
-          <div className="text-center text-4xl font-bold text-black dark:text-white">
-            Welcome to Chatbot UI
-          </div>
-          <div className="text-center text-lg text-black dark:text-white">
-            {/* <div className="mb-8">{`Chatbot UI is an open source clone of OpenAI's ChatGPT UI.`}</div> */}
-            <div className="mb-2 font-bold">
-              {/* Important: Chatbot UI is 100% unaffiliated with OpenAI. */}
-            </div>
-          </div>
-          <div className="text-center text-gray-500 dark:text-gray-400">
-            <div className="mb-2">
-              Chatbot UI allows you to plug in your API key to use this UI with
-              their API.
-            </div>
-            <div className="mb-2">
-              It is <span className="italic">only</span> used to communicate
-              with their API.
-            </div>
-            <div className="mb-2">
-              {t('Please set your API key in the bottom left of the sidebar.')}
-            </div>
-            <div>
-              {t('Tip: use BitAPAI to get started immediately, get your key ')}
-              <a
-                href="https://bitapai.io/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                here.
-              </a>
-            </div>
-          </div>
-        </div>
-      ) : modelError ? (
-        <ErrorMessageDiv error={modelError} />
-      ) : (
-        <>
-          <div
-            className="max-h-full overflow-x-hidden"
-            ref={chatContainerRef}
-            onScroll={handleScroll}
-          >
-            {selectedConversation?.messages.length === 0 ? (
-              <>
-                <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
-                  <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
-                    Chatbot UI
-                  </div>
-
-                  <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
-                    <SystemPrompt
-                      conversation={selectedConversation}
-                      prompts={prompts}
-                      onChangePrompt={(prompt) =>
-                        handleUpdateConversation(selectedConversation, {
-                          key: 'prompt',
-                          value: prompt,
-                        })
-                      }
-                    />
-                  </div>
+      <div
+        className="max-h-full overflow-x-hidden"
+        ref={chatContainerRef}
+        onScroll={handleScroll}
+      >
+        {selectedConversation?.messages.length === 0 || !isAuthenticated ? (
+          <>
+            <div className="mx-auto flex flex-col space-y-1 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
+              <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
+                {title}
+              </div>
+              <div className="text-center text-lg text-black dark:text-white">
+                <div className="mb-4">
+                  Leverage the decentralized power of Bittensor through an
+                  accessible chat interface.
                 </div>
-              </>
-            ) : (
-              <>
-                <div className="sticky top-0 z-10 flex justify-center border border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
-                  {t('API')}: {api}
-                  <button
-                    className="ml-2 cursor-pointer hover:opacity-50"
-                    onClick={onClearAll}
-                  >
-                    <IconClearAll size={18} />
-                  </button>
-                </div>
-                {selectedConversation?.messages.map((message, index) => (
-                  <MemoizedChatMessage
-                    key={index}
-                    message={message}
-                    messageIndex={index}
-                    onEdit={(editedMessage) => {
-                      setCurrentMessage(editedMessage);
-                      // discard edited message and the ones that come after then resend
-                      handleSend(
-                        editedMessage,
-                        selectedConversation?.messages.length - index,
-                      );
-                    }}
-                  />
-                ))}
+                {isLoading ? (
+                  <div className="flex justify-center mx-auto h-12">
+                    <Spinner className="w-10 h-10" />
+                  </div>
+                ) : !isAuthenticated ? (
+                  <>
+                    <p>
+                      Log in to access the Bittensor network and start chatting
+                      with the AI.
+                    </p>
+                    <LoginButton />
+                  </>
+                ) : (
+                  <p className="text-sm">
+                    Your conversations are saved locally on your machine.
+                  </p>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {selectedConversation?.messages.map((message, index) => (
+              <MemoizedChatMessage
+                key={index}
+                message={message}
+                messageIndex={index}
+                onEdit={(editedMessage) => {
+                  setCurrentMessage(editedMessage);
+                  // discard edited message and the ones that come after then resend
+                  handleSend(
+                    editedMessage,
+                    selectedConversation?.messages.length - index,
+                  );
+                }}
+              />
+            ))}
 
-                {loading && <ChatLoader />}
+            {loading && <ChatLoader />}
 
-                <div
-                  className="h-[162px] bg-white dark:bg-[#343541]"
-                  ref={messagesEndRef}
-                />
-              </>
-            )}
-          </div>
+            <div
+              className="h-[162px] bg-white dark:bg-[#343541]"
+              ref={messagesEndRef}
+            />
+          </>
+        )}
+      </div>
 
-          <ChatInput
-            stopConversationRef={stopConversationRef}
-            textareaRef={textareaRef}
-            onSend={(message, plugin) => {
-              setCurrentMessage(message);
-              handleSend(message, 0, plugin);
-            }}
-            onScrollDownClick={handleScrollDown}
-            onRegenerate={() => {
-              if (currentMessage) {
-                handleSend(currentMessage, 2, null);
-              }
-            }}
-            showScrollDownButton={showScrollDownButton}
-          />
-        </>
-      )}
+      <ChatInput
+        onStopConversation={handleStopConversation}
+        textareaRef={textareaRef}
+        onSend={(message, uid, plugin) => {
+          setCurrentMessage(message);
+          handleSend(message, 0, plugin, uid);
+        }}
+        onScrollDownClick={handleScrollDown}
+        onRegenerate={() => {
+          if (currentMessage) {
+            const deleteCount =
+              selectedConversation?.messages?.at(-1)?.role === 'user' ? 1 : 2;
+            handleSend(currentMessage, deleteCount, null);
+          }
+        }}
+        showScrollDownButton={showScrollDownButton}
+        disabled={!isAuthenticated}
+      />
     </div>
   );
 });

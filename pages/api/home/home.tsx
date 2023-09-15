@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useEffect, useState } from 'react';
 
 import { GetServerSideProps } from 'next';
 import { useTranslation } from 'next-i18next';
@@ -8,14 +7,11 @@ import Head from 'next/head';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
-import useErrorService from '@/services/errorService';
-import useApiService from '@/services/useApiService';
-
 import {
   cleanConversationHistory,
   cleanSelectedConversation,
 } from '@/utils/app/clean';
-import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, title } from '@/utils/app/const';
 import {
   saveConversation,
   saveConversations,
@@ -28,6 +24,7 @@ import { getSettings } from '@/utils/app/settings';
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
 import { FolderInterface, FolderType } from '@/types/folder';
+import { OpenAIModelID, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 
 import { Chat } from '@/components/Chat/Chat';
@@ -43,12 +40,15 @@ import { v4 as uuidv4 } from 'uuid';
 interface Props {
   serverSideApiKeyIsSet: boolean;
   serverSidePluginKeysSet: boolean;
+  defaultModelId: OpenAIModelID;
 }
 
-const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
+const Home = ({
+  serverSideApiKeyIsSet,
+  serverSidePluginKeysSet,
+  defaultModelId,
+}: Props) => {
   const { t } = useTranslation('chat');
-  const { getModels } = useApiService();
-  const { getModelsError } = useErrorService();
   const [initialRender, setInitialRender] = useState<boolean>(true);
 
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -56,39 +56,9 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
   });
 
   const {
-    state: {
-      apiKey,
-      lightMode,
-      folders,
-      conversations,
-      selectedConversation,
-      prompts,
-      temperature,
-    },
+    state: { lightMode, folders, conversations, selectedConversation, prompts },
     dispatch,
   } = contextValue;
-
-  const stopConversationRef = useRef<boolean>(false);
-
-  const { data, error, refetch } = useQuery(
-    ['GetModels', apiKey, serverSideApiKeyIsSet],
-    ({ signal }) => {
-      if (!apiKey && !serverSideApiKeyIsSet) return null;
-
-      return getModels(
-        {
-          key: apiKey,
-        },
-        signal,
-      );
-    },
-    // ! get models is turned off
-    { enabled: false, refetchOnMount: false },
-  );
-
-  useEffect(() => {
-    dispatch({ field: 'modelError', value: getModelsError(error) });
-  }, [dispatch, error, getModelsError]);
 
   // FETCH MODELS ----------------------------------------------
 
@@ -177,7 +147,6 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
       name: t('New Conversation'),
       messages: [],
       prompt: DEFAULT_SYSTEM_PROMPT,
-      temperature: lastConversation?.temperature,
       folderId: null,
     };
 
@@ -216,20 +185,7 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
     if (window.innerWidth < 640) {
       dispatch({ field: 'showChatbar', value: false });
     }
-  }, [selectedConversation]);
-
-  useEffect(() => {
-    serverSideApiKeyIsSet &&
-      dispatch({
-        field: 'serverSideApiKeyIsSet',
-        value: serverSideApiKeyIsSet,
-      });
-    serverSidePluginKeysSet &&
-      dispatch({
-        field: 'serverSidePluginKeysSet',
-        value: serverSidePluginKeysSet,
-      });
-  }, [, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
+  }, [dispatch, selectedConversation]);
 
   // ON LOAD --------------------------------------------
 
@@ -240,24 +196,6 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
         field: 'lightMode',
         value: settings.theme,
       });
-    }
-
-    const apiKey = localStorage.getItem('apiKey');
-
-    if (serverSideApiKeyIsSet) {
-      dispatch({ field: 'apiKey', value: '' });
-
-      localStorage.removeItem('apiKey');
-    } else if (apiKey) {
-      dispatch({ field: 'apiKey', value: apiKey });
-    }
-
-    const pluginKeys = localStorage.getItem('pluginKeys');
-    if (serverSidePluginKeysSet) {
-      dispatch({ field: 'pluginKeys', value: [] });
-      localStorage.removeItem('pluginKeys');
-    } else if (pluginKeys) {
-      dispatch({ field: 'pluginKeys', value: pluginKeys });
     }
 
     if (window.innerWidth < 640) {
@@ -309,7 +247,6 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
         value: cleanedSelectedConversation,
       });
     } else {
-      const lastConversation = conversations[conversations.length - 1];
       dispatch({
         field: 'selectedConversation',
         value: {
@@ -317,12 +254,17 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
           name: t('New Conversation'),
           messages: [],
           prompt: DEFAULT_SYSTEM_PROMPT,
-          temperature: lastConversation?.temperature,
           folderId: null,
         },
       });
     }
-  }, [dispatch, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
+  }, [
+    defaultModelId,
+    dispatch,
+    serverSideApiKeyIsSet,
+    serverSidePluginKeysSet,
+    t,
+  ]);
 
   return (
     <HomeContext.Provider
@@ -337,8 +279,11 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
       }}
     >
       <Head>
-        <title>Chatbot UI</title>
-        <meta name="description" content="ChatGPT but better." />
+        <title>{title}</title>
+        <meta
+          name="description"
+          content="Chat with AI via the Bittensor network"
+        />
         <meta
           name="viewport"
           content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
@@ -360,7 +305,7 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
             <Chatbar />
 
             <div className="flex flex-1">
-              <Chat stopConversationRef={stopConversationRef} />
+              <Chat />
             </div>
 
             <Promptbar />
@@ -373,6 +318,14 @@ const Home = ({ serverSideApiKeyIsSet, serverSidePluginKeysSet }: Props) => {
 export default Home;
 
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
+  const defaultModelId =
+    (process.env.DEFAULT_MODEL &&
+      Object.values(OpenAIModelID).includes(
+        process.env.DEFAULT_MODEL as OpenAIModelID,
+      ) &&
+      process.env.DEFAULT_MODEL) ||
+    fallbackModelID;
+
   let serverSidePluginKeysSet = false;
 
   const googleApiKey = process.env.GOOGLE_API_KEY;
@@ -384,7 +337,8 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
 
   return {
     props: {
-      serverSideApiKeyIsSet: !!process.env.BITAPAI_API_KEY,
+      serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
+      defaultModelId,
       serverSidePluginKeysSet,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',

@@ -9,7 +9,7 @@ import {
 
 import { useTranslation } from 'next-i18next';
 
-import { DEFAULT_SYSTEM_PROMPT, MESSAGE_MAX_LENGTH } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 
 import { Conversation } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
@@ -46,17 +46,6 @@ export const SystemPrompt: FC<Props> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    const maxLength = MESSAGE_MAX_LENGTH;
-
-    if (value.length > maxLength) {
-      alert(
-        t(
-          `Prompt limit is {{maxLength}} characters. You have entered {{valueLength}} characters.`,
-          { maxLength, valueLength: value.length },
-        ),
-      );
-      return;
-    }
 
     setValue(value);
     updatePromptListVisibility(value);

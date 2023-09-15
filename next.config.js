@@ -13,6 +13,22 @@ const nextConfig = {
 
     return config;
   },
+  images: {
+    remotePatterns: [
+      {
+        // auth0 username/password avatars
+        hostname: 's.gravatar.com',
+      },
+      {
+        // Google avatars
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        // Github Avatars
+        hostname: 'avatars.githubusercontent.com',
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

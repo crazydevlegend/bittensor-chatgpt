@@ -1,32 +1,44 @@
-import { NextResponse } from 'next/server';
-
 import {
-  APIError,
-  ConversationApi,
-} from '@/utils/server/integrations/conversation';
+  DEFAULT_SYSTEM_PROMPT,
+  NEXT_PUBLIC_VALIDATOR_ENDPOINT_BASE_URL,
+} from '@/utils/app/const';
 
 import { ChatBody, Message } from '@/types/chat';
-
 import { choose_plugin } from './plugin';
 
 export const config = {
   runtime: 'edge',
 };
 
+export class ValidatorEndpointError extends Error {
+  failed_responses: any[];
+  constructor(json: any) {
+    super(json?.detail || 'Unknown error');
+    this.name = 'ValidatorEndpointError';
+    this.failed_responses = json?.failed_responses || [];
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   try {
-    const { messages, key, prompt, api, plugins } =
-      (await req.json()) as ChatBody;
+    const { messages, key, prompt, uid, plugins } = (await req.json()) as ChatBody;
+    const url = NEXT_PUBLIC_VALIDATOR_ENDPOINT_BASE_URL + '/conversation';
+    const res_uids = await fetch(`https://test.neuralinternet.ai/top_miner_uids?n=20`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${key}`,
+      },
+      method: 'GET',
+    });
+    const top_miner_uids = await res_uids.json();
 
-    // let promptToSend = prompt;
-    // if (!promptToSend) {
-    //   promptToSend = DEFAULT_SYSTEM_PROMPT;
-    // }
-
+    console.log("plugins", plugins);
     const plugin_assistant = await choose_plugin(
       messages[messages.length - 1].content,
       plugins,
       key,
+      url,
+      top_miner_uids
     );
 
     if (plugin_assistant) {
@@ -45,28 +57,58 @@ const handler = async (req: Request): Promise<Response> => {
       messagesToSend = [message, ...messagesToSend];
     }
 
-    const response = await ConversationApi({
-      key,
-      messages: messagesToSend,
-      systemPrompt: prompt,
-      apiId: api,
+    // const strategy: {
+    //   uids?: number[];
+    //   top_n?: number;
+    // } = {};
+    // if (uid !== undefined) {
+    //   strategy.uids = [uid];
+    // } else {
+    //   strategy.top_n = 1;
+    // }
+    const strategy = {uids: [top_miner_uids[0]]};
+    const body = {
+      messages: [
+        {
+          role: 'system',
+          content: prompt || DEFAULT_SYSTEM_PROMPT,
+        },
+        ...messages,
+      ],
+      ...strategy,
+    };
+
+    const res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${key}`,
+      },
+      method: 'POST',
+      body: JSON.stringify(body),
     });
 
-    return new Response(response);
+    if (res.status !== 200) {
+      const json = await res.json();
+      throw new ValidatorEndpointError(json);
+    }
+    const text = await res.text();
+    return new Response(text);
   } catch (error) {
     console.error(error);
-    if (error instanceof APIError) {
-      return NextResponse.json(
-        { type: 'Error', error: error.message },
+    if (error instanceof ValidatorEndpointError) {
+      return new Response(
+        JSON.stringify({
+          error: error.message,
+          failed_responses: error.failed_responses,
+        }),
         {
           status: 500,
         },
       );
     } else {
-      return NextResponse.json(
-        { type: 'Error', error: 'Unknown error occured' },
-        { status: 500 },
-      );
+      return new Response(JSON.stringify({ error: 'Unknown error' }), {
+        status: 500,
+      });
     }
   }
 };

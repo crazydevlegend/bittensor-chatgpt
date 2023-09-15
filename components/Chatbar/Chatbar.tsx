@@ -111,6 +111,17 @@ export const Chatbar = () => {
   };
 
   const handleClearConversations = () => {
+    homeDispatch({
+      field: 'selectedConversation',
+      value: {
+      id: uuidv4(),
+      name: t('New Conversation'),
+      messages: [],
+      prompt: DEFAULT_SYSTEM_PROMPT,
+      folderId: null,
+      },
+      });
+
     homeDispatch({ field: 'conversations', value: [] });
 
     localStorage.removeItem('conversationHistory');
@@ -139,6 +150,16 @@ export const Chatbar = () => {
 
       saveConversation(updatedConversations[updatedConversations.length - 1]);
     } else {
+      homeDispatch({
+        field: 'selectedConversation',
+        value: {
+        id: uuidv4(),
+        name: t('New Conversation'),
+        messages: [],
+        prompt: DEFAULT_SYSTEM_PROMPT,
+        folderId: null,
+        },
+        });
       localStorage.removeItem('selectedConversation');
     }
   };

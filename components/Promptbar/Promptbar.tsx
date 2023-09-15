@@ -5,6 +5,7 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 
 import { savePrompts } from '@/utils/app/prompts';
 
+import { OpenAIModels } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -43,7 +44,6 @@ const Promptbar = () => {
   };
 
   const handleCreatePrompt = () => {
-    // if (defaultModelId) {
     const newPrompt: Prompt = {
       id: uuidv4(),
       name: `Prompt ${prompts.length + 1}`,
@@ -51,10 +51,12 @@ const Promptbar = () => {
       content: '',
       folderId: null,
     };
+
     const updatedPrompts = [...prompts, newPrompt];
+
     homeDispatch({ field: 'prompts', value: updatedPrompts });
+
     savePrompts(updatedPrompts);
-    // }
   };
 
   const handleDeletePrompt = (prompt: Prompt) => {
