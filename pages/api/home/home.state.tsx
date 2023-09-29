@@ -26,6 +26,7 @@ export interface HomeInitialState {
   serverSidePluginKeysSet: boolean;
   api: string;
   selectedPlugins: string[];
+  publicPDFLink: string;
 }
 
 export const initialState: HomeInitialState = {
@@ -50,4 +51,5 @@ export const initialState: HomeInitialState = {
   serverSidePluginKeysSet: false,
   api: 'bitapai',
   selectedPlugins: [],
+  publicPDFLink: "src_tDP4qdu6bZZA6xsUIW9F6",
 };

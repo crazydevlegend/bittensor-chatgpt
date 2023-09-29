@@ -51,6 +51,7 @@ export const Chat = memo(() => {
       prompts,
       api,
       selectedPlugins,
+      publicPDFLink
     },
     handleUpdateConversation,
     dispatch: homeDispatch,
@@ -118,6 +119,15 @@ export const Chat = memo(() => {
         let body;
         if (!plugin) {
           body = JSON.stringify(chatBody);
+          if (selectedPlugins.includes("chatpdf")) {
+            body = JSON.stringify({
+              ...chatBody,
+              others: {
+                publicPDFLink
+              }
+            });
+          }
+          else body = JSON.stringify(chatBody);
         } else {
           body = JSON.stringify({
             ...chatBody,
@@ -154,7 +164,6 @@ export const Chat = memo(() => {
           }
           // Response OK!
           const json = await response.json();
-          console.log('Response', json);
           homeDispatch({ field: 'loading', value: false });
           if (updatedConversation.messages.length === 1) {
             const { content } = message;
@@ -165,9 +174,16 @@ export const Chat = memo(() => {
               name: customName,
             };
           }
+          let lastMessage;
+          for (let i = 1; i < json.choices.length; i++) {
+            if (json.choices[i].message.content != "") {
+              lastMessage = json.choices[i].message;
+              break;
+            }
+          }
           const updatedMessages: Message[] = [
             ...updatedConversation.messages,
-            json.choices[0].message,
+            lastMessage,
           ];
           updatedConversation = {
             ...updatedConversation,

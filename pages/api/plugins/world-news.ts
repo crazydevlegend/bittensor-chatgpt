@@ -1,19 +1,19 @@
 type RequestData = {
-  text: string;
-  'source-countries': string;
-  language: string;
-  'min-sentiment': number;
-  'max-sentiment': number;
-  'earliest-publish-date': string;
-  'latest-publish-date': string;
-  'news-sources': string;
-  authors: string;
-  entities: string;
-  'location-filter': string;
-  number: number;
+  text?: string;
+  'source-countries'?: string;
+  language?: string;
+  'min-sentiment'?: number;
+  'max-sentiment'?: number;
+  'earliest-publish-date'?: string;
+  'latest-publish-date'?: string;
+  'news-sources'?: string;
+  authors?: string;
+  entities?: string;
+  'location-filter'?: string;
+  number?: number;
 };
 
-export const runPlugin = async (data: RequestData) => {
+export const runPlugin = async (data?: RequestData) => {
   const resp: any = await fetch(
     'https://api.worldnewsapi.com/search-news?' +
       new URLSearchParams({

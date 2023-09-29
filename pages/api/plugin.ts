@@ -6,6 +6,7 @@ export async function choose_plugin(
   api: string,
   url: string,
   uids: number [],
+  others: any
 ) {
   if (!plugins || plugins.length == 0) {
     return '';
@@ -23,12 +24,11 @@ ${plugins_with_description
     return `${index + 1}.
 Name: ${plugin.id}
 Description: ${plugin.description}
-Parameters: ${JSON.stringify(plugin.parameters)}\n`;
-  })
+Parameters: ${plugin.id == "chatpdf" ? JSON.stringify({"sourceId":{"type":"string","description":`This must be '${others.publicPDFLink}'`},"text":{"type":"string","description":`This must be '${message}'`}}) : JSON.stringify(plugin.parameters)}\n`;
+})
   .join('\n')}
 
-You must respond only with json format with type of followings
-{"plugin":PLUGIN_NAME, "parameters":{PARAM1:PARAM1_VALUE,PARAM2:PARAM2_VALUE,...}}`;
+  You must respond only with json format with type of followings{"plugin":PLUGIN_NAME, "parameters":{PARAM1:PARAM1_VALUE,PARAM2:PARAM2_VALUE,...}}`;
   const data = {
     messages: [
       {
@@ -53,6 +53,7 @@ You must respond only with json format with type of followings
     body: JSON.stringify(data),
   }).then((res) => res.json());
 
+  console.log("response", response)
   const response_texts = response.choices.map(
     (each: any) => each.message.content,
   );
@@ -81,6 +82,14 @@ You must respond only with json format with type of followings
   return '';
 }
 
+const isWebDevPluginWithMatcParam = (plugin: any, resp_json: any) => {
+  const isWebDevPlugin = plugin.id === 'web-dev';
+  const hasMatchingParameters = Object.keys(resp_json.parameters).every(
+    (key) => plugin.parameters[key],
+  );
+  return isWebDevPlugin && hasMatchingParameters;
+};
+
 function validate_response(resp_text: string) {
   try {
     const resp_json = JSON.parse(resp_text);
@@ -91,9 +100,8 @@ function validate_response(resp_text: string) {
       );
 
       if (!plugin) return false;
-      if (
-        Object.keys(plugin.parameters).some((key) => !resp_json.parameters[key])
-      )
+      if (isWebDevPluginWithMatcParam(plugin, resp_json)) return true;
+      if (Object.keys(plugin.parameters).some((key) => !resp_json.parameters[key]))
         return false;
       return true;
     }
