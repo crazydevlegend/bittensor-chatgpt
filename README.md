@@ -132,4 +132,4 @@ To add new plugins, kindly check the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 
 ## Contact
 
-If you have any questions, feel free to reach out to [@crazydevlegend](https://github.com/crazydevlegend)
+If you have any questions, feel free to reach out to [@crazydevlegend](https://twitter.com/crazydevlegend)
